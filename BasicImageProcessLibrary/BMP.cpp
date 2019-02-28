@@ -129,7 +129,7 @@ void BMP::cropImage(int x1, int y1 , int x2 , int y2){
 }
 
 
-void::BMP::zeroMatrix(int width , int height){
+void BMP::zeroMatrix(int width , int height){
     
     width = (2 * width ) + 1 ;
     height = (2 * height ) + 1 ;
