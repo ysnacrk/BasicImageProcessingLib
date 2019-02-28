@@ -12,7 +12,7 @@ typedef uint32_t DWORD;
 class FileInfo{
     public:
         FileInfo(){
-            cout<<"file a girdi"<<endl;
+            
         }
 
         FileInfo(char * );

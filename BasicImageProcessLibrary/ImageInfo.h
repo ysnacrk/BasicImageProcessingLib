@@ -14,7 +14,7 @@ class ImageInfo{
 
     public:
         ImageInfo(){
-            std::cout<<"image e girdi"<<endl;
+            
         }
 
 
