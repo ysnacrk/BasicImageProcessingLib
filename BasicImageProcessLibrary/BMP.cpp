@@ -201,7 +201,7 @@ void BMP::zoomImage(int width , int height){
     bmp -> imageinfo -> setWidth(width);
     bmp -> imageinfo -> setSize(imageSize - 54);
 
-    ofstream file("mvmvmv.bmp" , ios::binary);
+    ofstream file("zoom.bmp" , ios::binary);
     
     file.write((char *)bmp ->fileinfo-> getAllHeader() , 14);
     file.write((char *)bmp ->imageinfo-> getAllInfo() , 40);
