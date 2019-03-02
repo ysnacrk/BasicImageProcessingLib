@@ -7,8 +7,8 @@ I get read and write functions in this repo https://github.com/yvznvr/ImageProce
 
 
 # Original image repository
-<img src="asd.bmp" border="0" />
+<img src="BasicImageProcessLibrary/asd.bmp" border="0" />
 
 # Zoom in image repository
 
-<img src="aa.bmp" border="0" />
+<img src="BasicImageProcessLibrary/aa.bmp" border="0" />
