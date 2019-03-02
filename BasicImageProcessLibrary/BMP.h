@@ -13,6 +13,7 @@ typedef uint32_t DWORD;
 class BMP{
     public:
         BMP();
+        
         FileInfo * fileinfo;
         ImageInfo * imageinfo;
 
@@ -22,8 +23,6 @@ class BMP{
         void cropImage(int x1, int y1 , int x2 , int y2 );
         void zeroMatrix(int width , int height);
         void zoomImage(int row , int column);
-
-
 
     private:
 

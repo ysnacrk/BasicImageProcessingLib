@@ -16,7 +16,8 @@ void BMP::readImage(string filename){
     fileinfo->setFileHeader(filetemp);      //send allData
     file.read(imagetemp , sizeof(imagetemp));
     imageinfo->setImageHeader(imagetemp);
-    
+    fileinfo  ->  setOffSet(54);
+
     file.seekg(54);    //move cursor offset
     
     padding = 0;  
@@ -31,7 +32,7 @@ void BMP::readImage(string filename){
         
         file.read((char*)buffer,sizeof(buffer));        //read first row image
         memcpy(pointerOfData,buffer,sizeof(buffer));    //copy buffer adresses
-        pointerOfData += sizeof(buffer);                //move pointer 
+        pointerOfData += sizeof(buffer);                //move pointer
         file.read((char*)buffer,padding);               //move cursor 
     }
 
@@ -106,94 +107,71 @@ void BMP::cropImage(int x1, int y1 , int x2 , int y2){
     int column =  abs(x1 - x2);
     int iter = 0;
 
+
     zeroData = new BYTE[column * row];
+    BYTE * iterator = zeroData;
 
     for(int i = y1 ; i < y2 ; i++ ){
         for(int j = x1 ; j < x2 ; j++ ){
-            if( j <= x2 && j >= x1){
-                zeroData[iter++] = grayData[i * column + j];
-                cout<<(int)grayData[i * column + j];
-                cout<<" ";
-            }
+            *iterator = grayData[i * column + j];
+            iterator++;            
         }
-        cout<<endl;
+        
     }
-    for(int i = 0 ; i < row ; i++){
-        for (int j = 0 ; j < column ; j++){
-            cout<<(int)zeroData[i*column + j];
-            cout<<" ";
-        }
-        cout<<endl;
-    }
-    zeroMatrix(row , column);
+
+
+    zeroMatrix(column , row);
 }
 
 
-void::BMP::zeroMatrix(int width , int height){
+void BMP::zeroMatrix(int width , int height){
     
-    width = (2 * width ) + 1 ;
-    height = (2 * height ) + 1 ;
+    int width2 = (2 * width ) + 1 ;
+    int height2 = (2 * height ) + 1 ;
    
-    tempMatrix = new BYTE[ width * height];
+    tempMatrix = new BYTE[ width2 * height2];
     BYTE  * iterator = zeroData;
 
 
-    for(int i = 0 ; i <  height; i++){
-        for(int j = 0 ; j < width ; j++){
+    for(int i = 0 ; i <  height2; i++){
+        for(int j = 0 ; j < width2 ; j++){
 
             if( (i % 2) == 0 || (j % 2) == 0){
-                tempMatrix[i * width + j] = 0;
+                tempMatrix[i * width2 + j] = 0;
             }
             else{
-                tempMatrix[i * width + j] = *iterator;
+                tempMatrix[i * width2 + j] = *iterator;
                 iterator++;
             }
         }
     }
 
-    for(int i = 0 ; i < height ; i++){
-        for (int j = 0 ; j < width ; j++){
-            cout<<(int)tempMatrix[i*width+ j];
-            cout<<" ";
-        }
-        cout<<endl;
-    }
-
-    zoomImage(width , height);
+    zoomImage(width2, height2);
 }
 
 void BMP::zoomImage(int width , int height){
 
     int sum = 0;
-    int iter = 1;
 
     float convolutionMatrix [9] = { 0.25 , 0.50 , 0.25 , 0.50 , 1 , 0.50 , 0.25 , 0.50 , 0.25 } ;
     
 
     zoomData = new BYTE [width * height];
 
-    for(int i = 0 ; i < height ; i++){
-        for (int j = 0 ; j < width ; j++){
-            /* cout<<"."; */
-            cout<<(int)tempMatrix[i*width+ j];
-            cout<<" ";
-        }
-        cout<<endl;
-    }
     
                     //matrisi sıfırlamamız gerek
     for(int i = 0 ; i < height ; i++){
         for (int j = 0 ; j < width ; j++){
-            zoomData[i * width + j] = 0;
+            zoomData[i * width + j] = 255;
         }
     }
 
-    for(int i = 0 ; i <= height - 3 ; i++){
-        for(int j = 0 ; j <= width - 3 ; j++){
+    for(int i = 0 ; i < height - 2 ; i++){
+        for(int j = 0 ; j < width - 2 ; j++){
             for(int k = 0 ; k < 3 ; k++){
                 for(int m = 0 ; m < 3 ; m++){
                 
-                    sum += tempMatrix[(width * k + m) + j + (i*width)] * convolutionMatrix[3 * k + m];
+                    sum += tempMatrix[(width * k) + m + j + (i * width)] * convolutionMatrix[3 * k + m];
                     
                     // (width * k + m) --> move convolution matrix
                     // j --> move convolution matrix x axis
@@ -205,13 +183,47 @@ void BMP::zoomImage(int width , int height){
         }
     }
 
+    BMP * bmp = new BMP;
 
-    for(int i = 0 ; i < height ; i++){
-        for (int j = 0 ; j < width ; j++){
-            cout<<(int)zoomData[i*width+ j];
-            cout<<" ";
+    int newPadding = 0;
+    
+    BYTE * iterator = zoomData;
+
+    while((width*3+newPadding)%4 != 0) newPadding++;
+
+    DWORD imageSize = width * height * 3 + 54;
+
+    bmp -> fileinfo->setFileHeader((char*)fileinfo->getAllHeader());
+    bmp -> fileinfo->setSize(imageSize);
+    bmp -> padding = newPadding;
+    bmp -> imageinfo -> setImageHeader((char *)imageinfo->getAllInfo());
+    bmp -> imageinfo -> setHeight(height);
+    bmp -> imageinfo -> setWidth(width);
+    bmp -> imageinfo -> setSize(imageSize - 54);
+
+    ofstream file("mvmvmv.bmp" , ios::binary);
+    
+    file.write((char *)bmp ->fileinfo-> getAllHeader() , 14);
+    file.write((char *)bmp ->imageinfo-> getAllInfo() , 40);
+
+    unsigned int pixelNumber = 0; 
+
+    for(int i=0;i<(int)bmp -> imageinfo-> getBiSize()/3;i++){
+        
+        file.write((char*)iterator,1);  //r
+        file.write((char*)iterator,1);  //g
+        file.write((char*)iterator++,1); //b
+
+        pixelNumber++;
+
+        if(pixelNumber == bmp -> imageinfo->getWidth()){
+            BYTE pad = 0;
+            for(int i=0;i< newPadding ;i++) file.write((char*)&pad,1);
+            pixelNumber = 0;
         }
-        cout<<endl;
     }
+
+    file.close();
+
 }
 

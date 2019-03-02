@@ -24,7 +24,7 @@ class FileInfo{
         BYTE * getAllHeader();
         
         //set functions
-
+        void setOffSet(DWORD offset);
         void setFileHeader(char *);
         void setSize(DWORD);
     

@@ -11,7 +11,6 @@ void FileInfo::setFileHeader(char * header){
 WORD FileInfo::getType(){
     WORD type;
     memcpy(&type , allHeader , sizeof(type));      
-
     return type;
 }
 
@@ -40,4 +39,9 @@ BYTE * FileInfo::getAllHeader(){
 void FileInfo::setSize(DWORD size){
     BYTE * temp = allHeader + 2;
     memcpy(&temp , &size , 4);
+}
+
+void FileInfo::setOffSet(DWORD offset){
+    BYTE * temp = allHeader + 10;
+    memcpy(&temp , &offset , sizeof(offset));
 }
