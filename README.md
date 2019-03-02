@@ -12,6 +12,3 @@ I get read and write functions in this repo https://github.com/yvznvr/ImageProce
 # Gray image 
 <img src="BasicImageProcessLibrary/grayScale.bmp" border="0" />
 
-# Zoom in image 
-
-<img src="BasicImageProcessLibrary/zoom.bmp" border="0" />
