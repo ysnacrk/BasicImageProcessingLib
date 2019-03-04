@@ -75,6 +75,33 @@ void BMP::saveGrayScale(string filename){
 
     file.close();
 }
+void BMP::saveGrayScale(BYTE * temp , string filename){
+
+    BYTE * pointerOfData = temp;
+
+    ofstream file(filename + ".bmp" , ios::binary);
+    file.write((char *)fileinfo->getAllHeader() , 14);
+    file.write((char *)imageinfo->getAllInfo() , 40);
+
+    unsigned int pixelNumber = 0; 
+
+    for(int i=0;i<(int)imageinfo->getBiSize()/3;i++){
+        
+        file.write((char*)pointerOfData,1);
+        file.write((char*)pointerOfData,1);
+        file.write((char*)pointerOfData++,1);
+        
+        pixelNumber++;
+
+        if(pixelNumber == imageinfo->getWidth()){
+            BYTE pad = 0;
+            for(int i=0;i<padding;i++) file.write((char*)&pad,1);
+            pixelNumber = 0;
+        }
+    }
+
+    file.close();
+}
 
 void BMP::saveImage(string filename){
 
@@ -103,35 +130,36 @@ void BMP::saveImage(string filename){
 
 void BMP::cropImage(int x1, int y1 , int x2 , int y2){
     
-    int row = abs(y1 - y2);
-    int column =  abs(x1 - x2);
+    int height = abs(y1 - y2);
+    int width =  abs(x1 - x2);
     int iter = 0;
 
 
-    zeroData = new BYTE[column * row];
+    BYTE * zeroData = new BYTE[width * height];
     BYTE * iterator = zeroData;
 
     for(int i = y1 ; i < y2 ; i++ ){
         for(int j = x1 ; j < x2 ; j++ ){
-            *iterator = grayData[i * column + j];
+            *iterator = grayData[i * width + j];
             iterator++;            
         }
         
     }
+    float zoomMatrix [9] = { 0.25 , 0.50 , 0.25 , 0.50 , 1 , 0.50 , 0.25 , 0.50 , 0.25 } ;
 
-
-    zeroMatrix(column , row);
+    convolutionMatrix(zeroData ,width , height , zoomMatrix ,  3 , 3);
 }
 
 
-void BMP::zeroMatrix(int width , int height){
+BYTE * BMP::convolutionMatrix(BYTE * buffer ,int width , int height , float *  convolutionMatrix, int row , int column){
+
+
     
     int width2 = (2 * width ) + 1 ;
     int height2 = (2 * height ) + 1 ;
-   
-    tempMatrix = new BYTE[ width2 * height2];
-    BYTE  * iterator = zeroData;
-
+    
+    BYTE * tempMatrix = new BYTE[ width2 * height2];
+    BYTE  * iterator = buffer;
 
     for(int i = 0 ; i <  height2; i++){
         for(int j = 0 ; j < width2 ; j++){
@@ -146,39 +174,31 @@ void BMP::zeroMatrix(int width , int height){
         }
     }
 
-    zoomImage(width2, height2);
-}
+    buffer = new BYTE [width2 * height2];
 
-void BMP::zoomImage(int width , int height){
+    //matrisi sıfırlamamız gerek
 
-    int sum = 0;
-
-    float convolutionMatrix [9] = { 0.25 , 0.50 , 0.25 , 0.50 , 1 , 0.50 , 0.25 , 0.50 , 0.25 } ;
-    
-
-    zoomData = new BYTE [width * height];
-
-    
-                    //matrisi sıfırlamamız gerek
-    for(int i = 0 ; i < height ; i++){
-        for (int j = 0 ; j < width ; j++){
-            zoomData[i * width + j] = 255;
+    for(int i = 0 ; i < height2 ; i++){
+        for (int j = 0 ; j < width2 ; j++){
+            buffer[i * width2 + j] = 255;
         }
     }
 
-    for(int i = 0 ; i < height - 2 ; i++){
-        for(int j = 0 ; j < width - 2 ; j++){
-            for(int k = 0 ; k < 3 ; k++){
-                for(int m = 0 ; m < 3 ; m++){
+    int sum = 0;
+
+    for(int i = 0 ; i < height2 - 2 ; i++){
+        for(int j = 0 ; j < width2 - 2 ; j++){
+            for(int k = 0 ; k < row ; k++){
+                for(int m = 0 ; m < column ; m++){
                 
-                    sum += tempMatrix[(width * k) + m + j + (i * width)] * convolutionMatrix[3 * k + m];
+                    sum += tempMatrix[(width2 * k) + m + j + (i * width2)] * convolutionMatrix[3 * k + m];
                     
                     // (width * k + m) --> move convolution matrix
                     // j --> move convolution matrix x axis
                     // (i*width) --> move convolution matrix y axis  
                 }
             }
-            zoomData[(i + 1) * width + (j + 1)] = sum;
+            buffer[(i + 1) * width2 + (j + 1)] = sum;
             sum = 0;
         }
     }
@@ -187,43 +207,20 @@ void BMP::zoomImage(int width , int height){
 
     int newPadding = 0;
     
-    BYTE * iterator = zoomData;
+    while((width2*3+newPadding)%4 != 0) newPadding++;
 
-    while((width*3+newPadding)%4 != 0) newPadding++;
-
-    DWORD imageSize = width * height * 3 + 54;
+    DWORD imageSize = width2 * height2 * 3 + 54;
 
     bmp -> fileinfo->setFileHeader((char*)fileinfo->getAllHeader());
     bmp -> fileinfo->setSize(imageSize);
     bmp -> padding = newPadding;
     bmp -> imageinfo -> setImageHeader((char *)imageinfo->getAllInfo());
-    bmp -> imageinfo -> setHeight(height);
-    bmp -> imageinfo -> setWidth(width);
+    bmp -> imageinfo -> setHeight(height2);
+    bmp -> imageinfo -> setWidth(width2);
     bmp -> imageinfo -> setSize(imageSize - 54);
 
-    ofstream file("zoom.bmp" , ios::binary);
-    
-    file.write((char *)bmp ->fileinfo-> getAllHeader() , 14);
-    file.write((char *)bmp ->imageinfo-> getAllInfo() , 40);
+    bmp -> saveGrayScale(buffer , "masked");
 
-    unsigned int pixelNumber = 0; 
-
-    for(int i=0;i<(int)bmp -> imageinfo-> getBiSize()/3;i++){
-        
-        file.write((char*)iterator,1);  //r
-        file.write((char*)iterator,1);  //g
-        file.write((char*)iterator++,1); //b
-
-        pixelNumber++;
-
-        if(pixelNumber == bmp -> imageinfo->getWidth()){
-            BYTE pad = 0;
-            for(int i=0;i< newPadding ;i++) file.write((char*)&pad,1);
-            pixelNumber = 0;
-        }
-    }
-
-    file.close();
-
+    return buffer;
 }
 

@@ -19,18 +19,17 @@ class BMP{
 
         void readImage(string filename);
         void saveGrayScale(string filename);
+        void saveGrayScale(BYTE * ,string filename);
         void saveImage(string filename);
         void cropImage(int x1, int y1 , int x2 , int y2 );
-        void zeroMatrix(int width , int height);
-        void zoomImage(int row , int column);
+        BYTE * convolutionMatrix(BYTE * , int width , int height , float * , int row , int column);
 
     private:
 
         BYTE * data;
         BYTE * grayData;
         
-        BYTE * zeroData;
-        BYTE * zoomData;
+        
         BYTE * tempMatrix;
 
         int padding;

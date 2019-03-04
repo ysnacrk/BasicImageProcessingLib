@@ -3,7 +3,7 @@
 
 int main(){
     BMP bmp;
-    bmp.readImage("sample.bmp");
+    bmp.readImage("test.bmp");
     bmp.saveGrayScale("grayScale");
-    bmp.cropImage(0,0,1000,500);
+    bmp.cropImage(0,0,512,512);
 }
