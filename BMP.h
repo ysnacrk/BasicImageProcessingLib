@@ -3,6 +3,7 @@
 #include<fstream>
 #include <cstdint>
 #include <cstring>
+#include <math.h>
 #include "FileInfo.h"
 #include "ImageInfo.h"
 
@@ -22,8 +23,9 @@ class BMP{
         void saveGrayScale(BYTE * ,string filename);
         void saveImage(string filename);
         void cropImage(int x1, int y1 , int x2 , int y2 );
+        int * histogram();
         BYTE * convolutionMatrix(BYTE * , int width , int height , float * , int row , int column);
-
+        BYTE * kMeans(BYTE *data , int width , int height , int K);
     private:
 
         BYTE * data;
@@ -34,3 +36,5 @@ class BMP{
 
         int padding;
 };
+
+

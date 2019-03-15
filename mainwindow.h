@@ -6,7 +6,7 @@
 #include <QLabel>
 #include <QImage>
 #include <QDir>
-
+#include "qcustomplot.h"
 
 #include "BMP.h"
 

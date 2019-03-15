@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1228</width>
-    <height>690</height>
+    <width>1498</width>
+    <height>928</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>1130</x>
-      <y>550</y>
+      <x>1150</x>
+      <y>780</y>
       <width>86</width>
       <height>39</height>
      </rect>
@@ -30,8 +30,8 @@
    <widget class="QLabel" name="label_pic">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>0</y>
+      <x>20</x>
+      <y>10</y>
       <width>16</width>
       <height>21</height>
      </rect>
@@ -43,8 +43,8 @@
    <widget class="QLabel" name="label_pic_2">
     <property name="geometry">
      <rect>
-      <x>1200</x>
-      <y>0</y>
+      <x>900</x>
+      <y>10</y>
       <width>31</width>
       <height>41</height>
      </rect>
@@ -56,8 +56,8 @@
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>1030</x>
-      <y>550</y>
+      <x>1040</x>
+      <y>780</y>
       <width>86</width>
       <height>39</height>
      </rect>
@@ -66,13 +66,13 @@
      <string>Histogram</string>
     </property>
    </widget>
-   <widget class="QWidget" name="widget" native="true">
+   <widget class="QCustomPlot" name="widget" native="true">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>330</y>
-      <width>751</width>
-      <height>221</height>
+      <y>510</y>
+      <width>921</width>
+      <height>321</height>
      </rect>
     </property>
    </widget>
@@ -82,7 +82,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1228</width>
+     <width>1498</width>
      <height>36</height>
     </rect>
    </property>
@@ -98,6 +98,14 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

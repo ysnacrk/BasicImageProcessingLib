@@ -33,6 +33,21 @@ void MainWindow::on_pushButton_clicked()
     bmp.saveGrayScale(path);
     QImage image2(QDir::currentPath() + "gray");
     ui -> label_pic_2 ->setPixmap(QPixmap::fromImage(image2));
-    bmp.cropImage(0,0,16,16);
     ui->label_pic_2->resize(ui->label_pic->pixmap()->size());
+
+
+    QCPBars *myBars = new QCPBars(ui->widget->xAxis, ui->widget->yAxis);
+    myBars->setName("Bars Series 1");
+    QVector<double> keyData;
+    QVector<double> valueData;
+
+    int  *histogram = bmp.histogram();
+
+    for(int i = 0 ; i< 256; i++) keyData.append(i);
+    for(int i = 0 ; i< 256; i++) valueData.append(histogram[i]);
+
+    myBars->setData(keyData, valueData);
+    ui->widget->rescaleAxes();
+    ui->widget->replot();
 }
+

@@ -12,3 +12,9 @@ I get read and write functions in this repo https://github.com/yvznvr/ImageProce
 # Gray image 
 <img src="grayScale.bmp" border="0" />
 
+# Histogram Data 
+<img src="histogram.png" border="0" />
+
+# K-means segmentation 
+<img src="mean.bmp" border="0" />
+

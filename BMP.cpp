@@ -138,28 +138,19 @@ void BMP::cropImage(int x1, int y1 , int x2 , int y2){
     BYTE * zeroData = new BYTE[width * height];
     BYTE * iterator = zeroData;
 
+
     for(int i = y1 ; i < y2 ; i++ ){
         for(int j = x1 ; j < x2 ; j++ ){
             *iterator = grayData[i * width + j];
             iterator++;
         }
-
     }
-    float zoomMatrix [9] = { 0.25 , 0.50 , 0.25 , 0.50 , 1 , 0.50 , 0.25 , 0.50 , 0.25 } ;
-
-    convolutionMatrix(zeroData ,width , height , zoomMatrix ,  3 , 3);
-}
-
-
-BYTE * BMP::convolutionMatrix(BYTE * buffer ,int width , int height , float *  convolutionMatrix, int row , int column){
-
 
 
     int width2 = (2 * width ) + 1 ;
     int height2 = (2 * height ) + 1 ;
 
     BYTE * tempMatrix = new BYTE[ width2 * height2];
-    BYTE  * iterator = buffer;
 
     for(int i = 0 ; i <  height2; i++){
         for(int j = 0 ; j < width2 ; j++){
@@ -168,37 +159,48 @@ BYTE * BMP::convolutionMatrix(BYTE * buffer ,int width , int height , float *  c
                 tempMatrix[i * width2 + j] = 0;
             }
             else{
-                tempMatrix[i * width2 + j] = *iterator;
-                iterator++;
+                tempMatrix[i * width2 + j] = zeroData[iter];
+                iter++;
             }
         }
     }
+    float zoomMatrix [9] = { 0.25 , 0.50, 0.25 , 0.50 , 1 , 0.50 , 0.25 , 0.50 , 0.25 } ;
 
-    buffer = new BYTE [width2 * height2];
+    kMeans(grayData, imageinfo->getWidth()  , imageinfo->getHeight() , 2);
+    convolutionMatrix(tempMatrix ,width2 , height2, zoomMatrix ,  3 , 3);
+}
 
-    //matrisi sıfırlamamız gerek
 
-    for(int i = 0 ; i < height2 ; i++){
-        for (int j = 0 ; j < width2 ; j++){
-            buffer[i * width2 + j] = 255;
+BYTE * BMP::convolutionMatrix(BYTE * buffer ,int width , int height , float *  convolutionMatrix, int row , int column){
+
+    BYTE * temp = new BYTE[ width * height];
+
+    //add zero first , last column and row then add masked
+
+    for(int i = 0 ; i < height ; i++){
+        for (int j = 0 ; j < width ; j++){
+            temp[i * width + j] = 255;
         }
     }
 
     int sum = 0;
 
-    for(int i = 0 ; i < height2 - 2 ; i++){
-        for(int j = 0 ; j < width2 - 2 ; j++){
+    for(int i = 0 ; i < height - 2 ; i++){
+        for(int j = 0 ; j < width - 2 ; j++){
             for(int k = 0 ; k < row ; k++){
                 for(int m = 0 ; m < column ; m++){
 
-                    sum += tempMatrix[(width2 * k) + m + j + (i * width2)] * convolutionMatrix[3 * k + m];
+                    sum +=(buffer[(width * k) + m + j + (i * width)] * convolutionMatrix[3 * k + m]);
 
                     // (width * k + m) --> move convolution matrix
                     // j --> move convolution matrix x axis
                     // (i*width) --> move convolution matrix y axis
                 }
             }
-            buffer[(i + 1) * width2 + (j + 1)] = sum;
+
+
+
+            temp[(i + ((row - 1)/2)) * width + (j + ((row - 1)/2))] = sum;
             sum = 0;
         }
     }
@@ -207,19 +209,102 @@ BYTE * BMP::convolutionMatrix(BYTE * buffer ,int width , int height , float *  c
 
     int newPadding = 0;
 
-    while((width2*3+newPadding)%4 != 0) newPadding++;
+    while((width*3+newPadding)%4 != 0) newPadding++;
 
-    DWORD imageSize = width2 * height2 * 3 + 54;
+    DWORD imageSize = width * height * 3 + 54;
 
     bmp -> fileinfo->setFileHeader((char*)fileinfo->getAllHeader());
     bmp -> fileinfo->setSize(imageSize);
     bmp -> padding = newPadding;
     bmp -> imageinfo -> setImageHeader((char *)imageinfo->getAllInfo());
-    bmp -> imageinfo -> setHeight(height2);
-    bmp -> imageinfo -> setWidth(width2);
+    bmp -> imageinfo -> setHeight(height);
+    bmp -> imageinfo -> setWidth(width);
     bmp -> imageinfo -> setSize(imageSize - 54);
 
-    bmp -> saveGrayScale(buffer , "masked");
+    bmp -> saveGrayScale(temp , "masked");
 
     return buffer;
 }
+
+BYTE * BMP :: kMeans(BYTE * data , int width  , int height , int K){
+
+        int histogram[256];
+
+        for(int i = 0; i < 256 ; i++)histogram[i] = 0;
+
+        for(int i = 0; i < height * width ; i++)histogram[data[i]]++;
+
+
+        int * label = new int [256];    //tag matrix
+        int * T = new int[K];           //T1 T2 T3 vs.
+
+        int * mean = new int [K];
+        int * meanSum = new int[K];
+
+        srand(time(0));
+
+        for(int i = 0 ; i < K  ; i++){
+            T[i] = rand() % 256;
+        }
+
+        int min = 0;
+        while(true){
+
+            for(int i = 0; i<256 ; i++){
+                min = 0;
+                for(int j = 1 ; j < K ; j++){
+                    if(abs(T[j] - i) < abs(T[min] - i))  //Euclidian distance
+                        min = j;
+
+                }
+                label[i] = T[min];
+            }
+
+            for(int i = 0 ; i < K ; i++){               //set zero mean
+                mean[i] = 0;
+                meanSum[i] = 0;
+            }
+
+            for(int i = 0; i<256 ; i ++){
+                for(int j = 0 ; j < K ; j++){
+                    if(label[i] == T[j]){
+                        mean[j] += histogram[i] * i;
+                        meanSum[j] += histogram[i];
+                    }
+                }
+            }
+
+            int * tempT = new int[K];
+            int counterFlag = 0;
+
+            for(int i = 0 ; i < K ; i++){               //find new T values or finish
+                tempT[i] = T[i];
+
+                if(meanSum[i] == 0) meanSum[i] = 1;
+                T[i] = mean[i] / meanSum[i];
+                if(T[i] == tempT[i]) counterFlag ++;
+            }
+
+            if(counterFlag == K) break;
+
+        }
+        int katsayi = 256 / K;                          //color range
+
+        for(int i = 0 ; i < 256 ; i++){
+            for(int j= 0; j<K ; j++ ){
+                if(label[i] == T[j]) label[i] = katsayi*j;
+            }
+        }
+        for(int i = 0 ; i < width * height ; i++) data[i] = label[data[i]];
+        saveGrayScale(data , "mean");
+        return data;
+}
+
+int * BMP::histogram(){
+    int * histogram = new int[256]();
+    for(int i = 0; i < (imageinfo->getWidth() * imageinfo->getHeight()) ; i++)histogram[grayData[i]]++;
+    return histogram;
+}
+
+
+
