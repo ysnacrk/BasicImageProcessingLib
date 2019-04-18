@@ -14,7 +14,7 @@ class ImageInfo{
 
     public:
         ImageInfo(){
-
+            
         }
 
 
@@ -25,13 +25,13 @@ class ImageInfo{
         WORD getBitCount(); //????
         BYTE * getAllInfo();
         DWORD getBiSize();
-
+        
         void setImageHeader(char *);
         void setWidth(int);
         void setHeight(int);
         void setSize(DWORD );
 
     private:
-
+        
         BYTE allInfo[40];
 };

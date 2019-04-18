@@ -10,7 +10,7 @@ void FileInfo::setFileHeader(char * header){
 
 WORD FileInfo::getType(){
     WORD type;
-    memcpy(&type , allHeader , sizeof(type));
+    memcpy(&type , allHeader , sizeof(type));      
     return type;
 }
 

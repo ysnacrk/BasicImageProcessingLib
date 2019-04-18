@@ -12,7 +12,7 @@ typedef uint32_t DWORD;
 class FileInfo{
     public:
         FileInfo(){
-
+            
         }
 
         FileInfo(char * );
@@ -22,14 +22,14 @@ class FileInfo{
         DWORD   getSize();
         DWORD   getOffSet();
         BYTE * getAllHeader();
-
+        
         //set functions
         void setOffSet(DWORD offset);
         void setFileHeader(char *);
         void setSize(DWORD);
-
+    
     private:
-
+        
         BYTE allHeader[14];
 
 };
