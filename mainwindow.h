@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QDir>
 #include "qcustomplot.h"
+#include "histogram.h"
 
 #include "BMP.h"
 
@@ -25,9 +26,12 @@ public:
 private slots:
     void on_pushButton_clicked();
 
+    void on_pushButton_2_clicked();
+
 private:
     BMP bmp;
     Ui::MainWindow *ui;
+    histogram * hist;
 };
 
 #endif // MAINWINDOW_H

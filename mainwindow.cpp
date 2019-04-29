@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "histogram.h"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -35,19 +35,14 @@ void MainWindow::on_pushButton_clicked()
     ui -> label_pic_2 ->setPixmap(QPixmap::fromImage(image2));
     ui->label_pic_2->resize(ui->label_pic->pixmap()->size());
 
-
-    QCPBars *myBars = new QCPBars(ui->widget->xAxis, ui->widget->yAxis);
-    myBars->setName("Bars Series 1");
-    QVector<double> keyData;
-    QVector<double> valueData;
-
-    int  *histogram = bmp.histogram();
-
-    for(int i = 0 ; i< 256; i++) keyData.append(i);
-    for(int i = 0 ; i< 256; i++) valueData.append(histogram[i]);
-
-    myBars->setData(keyData, valueData);
-    ui->widget->rescaleAxes();
-    ui->widget->replot();
 }
 
+
+void MainWindow::on_pushButton_2_clicked()
+{
+
+  hist = new histogram(this);
+  hist->show();
+  hist->drawHistogram(bmp.histogram());
+
+}

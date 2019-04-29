@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    histogram.cpp \
         main.cpp \
         mainwindow.cpp \
         qcustomplot.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
 
 
 HEADERS += \
+    histogram.h \
         mainwindow.h \
         qcustomplot.h \
     BMP.h \
@@ -45,6 +47,7 @@ HEADERS += \
 
 
 FORMS += \
+        histogram.ui \
         mainwindow.ui
 
 # Default rules for deployment.
