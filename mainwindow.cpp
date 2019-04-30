@@ -25,7 +25,6 @@ void MainWindow::on_pushButton_clicked()
        QImage image(fileName);
        ui -> label_pic ->setPixmap(QPixmap::fromImage(image));
        ui->label_pic->resize(ui->label_pic->pixmap()->size());
-
     }
 
     bmp.readImage(fileName.toUtf8().constData());
