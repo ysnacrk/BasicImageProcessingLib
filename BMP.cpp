@@ -3,6 +3,8 @@
 BMP::BMP(){
     imageinfo = new ImageInfo;
     fileinfo = new FileInfo;
+    h = new double [7];
+
 }
 
 
@@ -551,7 +553,7 @@ void BMP::drawRect(BYTE * label , BYTE  * image , int width , int height){
         
         drawLine(image , width, height, x1 , y1 , x1 , y2); //sol
         drawLine(image , width, height, x1 , y1 , x2 , y1); //üst
-        drawLine(image , width, height, x2 , y1 , x2 , y2); //sağ       
+        drawLine(image , width, height, x2 , y1 , x2 , y2); //sa?       
         drawLine(image , width, height, x1 , y2 , x2 , y2); //alt
 
     }
@@ -566,5 +568,62 @@ int * BMP::histogram(){
     return histogram;
 }
 
+double BMP::moment(BYTE * buffer , int width , int height , int pvalue , int qvalue){
+
+    double sum = 0;
+
+    for(int i = 0 ; i< height ; i++){
+        for(int j = 0 ; j < width ; j++){
+            sum += buffer[j + i * width] * pow(i , pvalue) * pow(j , qvalue);
+        }
+    }
+
+    return sum;
+}
+
+
+double BMP::centralMoment(BYTE * buffer , int width , int height , int pvalue , int qvalue){
+
+    //avgX = M10 / M00 , avgY = M01 / M00
+    double avgX = moment(buffer , width , height , 1 , 0) / moment(buffer , width , height , 0 , 0) ;
+    double avgY = moment(buffer , width , height , 0 , 1) / moment(buffer , width , height , 0 , 0) ;
+
+    double sum = 0;
+
+    for(int i = 0 ; i< height ; i++){
+        for(int j = 0 ; j < width ; j++){
+            sum += buffer[j + i * width] * pow(i - avgX , pvalue) * pow(j - avgY , qvalue);
+        }
+    }
+    return sum;
+}
+
+double BMP::normalizedMoment(BYTE * buffer , int width , int height , int pvalue , int qvalue){
+
+
+    return centralMoment(buffer , width , height , pvalue , qvalue) / pow(moment(buffer , width , height , 0, 0) , ((pvalue + qvalue) / 2) + 1);
+
+}
+
+
+
+void BMP::huInvariantMoments(BYTE * buffer , int width , int height , int pvalue , int qvalue){
+    
+    h[0] = normalizedMoment(buffer , width , height , 2,0) + normalizedMoment(buffer , width , height , 0,2);
+    h[1] = pow((normalizedMoment(buffer , width , height , 2,0) - normalizedMoment(buffer , width , height , 0,2)),2) + 4 * (pow(normalizedMoment(buffer , width , height , 1,1),2));
+    h[2] = pow((normalizedMoment(buffer , width , height , 3,0) - 3 * normalizedMoment(buffer , width , height , 1,2)),2) +
+            pow((3*normalizedMoment(buffer , width , height , 2,1) - normalizedMoment(buffer , width , height , 0,3)),2);
+    h[3] = pow((normalizedMoment(buffer , width , height , 3,0) + normalizedMoment(buffer , width , height , 1,2)),2) +
+            pow((normalizedMoment(buffer , width , height , 2,1) + normalizedMoment(buffer , width , height , 0,3)),2);
+    h[4] = (normalizedMoment(buffer , width , height , 3,0) - 3 * normalizedMoment(buffer , width , height , 1,2)) * (normalizedMoment(buffer , width , height , 3,0)+normalizedMoment(buffer , width , height , 1,2)) *(pow(normalizedMoment(buffer , width , height , 3,0) + normalizedMoment(buffer , width , height , 1,2),2) - 3 * pow(normalizedMoment(buffer , width , height , 2,1)+normalizedMoment(buffer , width , height , 0,3),2)) +
+            (3 * normalizedMoment(buffer , width , height , 2,1) - normalizedMoment(buffer , width , height , 0,3)) * (normalizedMoment(buffer , width , height , 2,1)+normalizedMoment(buffer , width , height , 0,3)) *
+            (pow(3 * (normalizedMoment(buffer , width , height , 3,0) + normalizedMoment(buffer , width , height , 1,2)),2) - pow(normalizedMoment(buffer , width , height , 2,1) + normalizedMoment(buffer , width , height , 0,3),2));
+    h[5] = (normalizedMoment(buffer , width , height , 2,0)-normalizedMoment(buffer , width , height , 0,2)) * (pow(normalizedMoment(buffer , width , height , 3,0) + normalizedMoment(buffer , width , height , 1,2),2) -
+            pow(normalizedMoment(buffer , width , height , 2,1) + normalizedMoment(buffer , width , height , 0,3),2)) + (4 * normalizedMoment(buffer , width , height , 1,1) * (normalizedMoment(buffer , width , height , 3,0) + normalizedMoment(buffer , width , height , 1,2)) *normalizedMoment(buffer , width , height , 2,1) + normalizedMoment(buffer , width , height , 0,3));
+    h[6] = (3 * normalizedMoment(buffer , width , height , 2,1) - normalizedMoment(buffer , width , height , 0,3)) * (normalizedMoment(buffer , width , height , 3,0) + normalizedMoment(buffer , width , height , 1,2)) * (pow(normalizedMoment(buffer , width , height , 3,0)+normalizedMoment(buffer , width , height , 1,2),2) -
+            3 * pow(normalizedMoment(buffer , width , height , 2,1) + normalizedMoment(buffer , width , height , 0,3),2)) - (normalizedMoment(buffer , width , height , 3,0) - 3 * normalizedMoment(buffer , width , height , 1,2)) * (normalizedMoment(buffer , width , height , 2,1) + normalizedMoment(buffer , width , height , 0,3)) *
+            (3 * pow(normalizedMoment(buffer , width , height , 3,0) + normalizedMoment(buffer , width , height , 1,2),2) - pow(normalizedMoment(buffer , width , height , 2,1) + normalizedMoment(buffer , width , height , 0,3),2));
+
+}
 
 

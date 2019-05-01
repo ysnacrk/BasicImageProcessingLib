@@ -35,16 +35,10 @@ class BMP{
         void drawRect(BYTE * label , BYTE  * image , int width , int height);
         void objectCout(BYTE * label , int width , int  height);
         
-        double moment(BYTE * buffer , int width , int height , int pvalue , int qvalue);
-        double centralMoment(BYTE * buffer , int width , int height , int pvalue , int qvalue);
-        double normalizedMoment(BYTE * buffer , int width , int height , int pvalue , int qvalue);
-        void huInvariantMoments(BYTE * buffer , int width , int height , int pvalue , int qvalue);
-
         BYTE * convolutionMatrix(BYTE * , int width , int height , float * , int row , int column);
         BYTE * kMeans(BYTE *data , int width , int height , int K);
-        BYTE * erosion(BYTE* image, int width, int height) ;
-        BYTE * dilation(BYTE* image, int width, int height);
-        BYTE * labeling(BYTE* image, int width , int height);
+        BYTE * erosion(BYTEs
+        BYTE * labeling(BYTE* image, int width , int height);asdfasdfasdfasdf
 
         int * histogram();            
 
@@ -52,7 +46,7 @@ class BMP{
 
         BYTE * data;
         BYTE * grayData;
-        double  * h;
+        
         
         BYTE * tempMatrix;
 
